@@ -1,46 +1,69 @@
 grammar Jepeto;
 
-jepeto : not_completed_program EOF;
+jepeto : func* main func* EOF;
 
-not_completed_program : function not_completed_program | main completed_program;
-completed_program : function completed_program |;
+func : FUNC_KEY identifier LPAR (expression(',' expression)*)? RPAR ':' 'func_body' |
+           FUNC_KEY identifier LPAR (expression(',' expression)*)? RPAR ':' LCURBRACE ('func_body')+ RCURBRACE |
+           FUNC_KEY identifier LPAR (identifier '=' expression(',' identifier '=' expression)*) RPAR ':' 'func_body' |
+           FUNC_KEY identifier LPAR (identifier '=' expression(',' identifier '=' expression)*) RPAR ':' LCURBRACE ('func_body')+ RCURBRACE;
 
-function : FUNC_KEY identifier LPAR (expression(',' expression)*)? RPAR ':' 'func_body'|
-           FUNC_KEY identifier LPAR (expression(',' expression)*)? RPAR ':' '{' ('func_body')+ '}'|
-           FUNC_KEY identifier LPAR (identifier '=' expression(',' identifier '=' expression)*)? RPAR ':' 'func_body'|
-           FUNC_KEY identifier LPAR (identifier '=' expression(',' identifier '=' expression)*)? RPAR ':' '{' ('func_body')+ '}';
+//delete left recursion
 
-expression : expression1 'or' expression | expression1;
-expression1 : expression2 'and' expression1 | expression2;
-expression2 : expression3 'is' expression2 | expression3 'not' expression2 | expression3;
-expression3 : expression4 '<' expression3 | expression4 '>' expression3 | expression4;
-expression4 : expression5 '+' expression4 | expression5 '-' expression4 | expression5;
-expression5 : expression6 '*' expression5 | expression6 '/' expression5 | expression6;
-expression6 : '-' expression6 | '~' expression6 | expression7; //left-to-right
-expression7 : expression8 '::' expression7 | expression8;
+expression : expression 'or' expression1 | expression1;
+//expression : expression1 a | expression1;
+//a: 'or' expression1 a | 'or' expression1;
+
+expression1 : expression1 'and' expression2 | expression2;
+//expression1 : expression2 b | expression2;
+//b: 'and' expression2 b | 'and' expression2;
+
+expression2 : expression2 'is' expression3 | expression2 'not' expression3 | expression3;
+//expression2 : expression3 c | expression3;
+//c: 'is' expression3 c | 'not' expression3 c | 'is' expression3 | 'not' expression3;
+
+expression3 : expression3 '<' expression4 | expression3 '>' expression4 | expression4;
+//expression3 : expression4 d | expression4;
+//d: '<' expression4 d | '>' expression4 d | '<' expression4 | '>' expression4;
+
+expression4 : expression4 '+' expression5 | expression4 '-' expression5 | expression5;
+//expression4 : expression5 e | expression5;
+//e: '+' expression5 e | '-' expression5 e | '+' expression5 | '-' expression5;
+
+expression5 : expression5 '*' expression6 | expression5 '/' expression6 | expression6;
+//expression5 : expression6 f | expression6;
+//f: '*' expression6 f | '/' expression6 f | '*' expression6 | '/' expression6;
+
+expression6 : '-' expression6 | '~' expression6 | expression7;
+
+expression7 : expression7 '::' expression8 | expression8;
+//expression7 : expression8 g | expression8;
+//g: '::' expression8 g | '::' expression8;
+
 expression8 : expression8 '.size' | expression9;
-expression9 : '[' expression9 ']' | expression10;
-expression10 : '(' expression ')' | primitive | anonymous_call | func_call | identifier;
+//expression8 : expression9 h | expression9;
+//h: '.size' h | '.size';
+
+expression9 : (anonymous_call | anonymous_func | func_call | list | primitive | identifier) (LBRACE expression RBRACE)? | LPAR expression RPAR;
 
 return: 'return' 'void' | 'return' expression;
 
+list: LBRACE (expression(',' expression)*)? RBRACE;
+
 print_call: 'print' LPAR expression RPAR;
 
-anonymous_func: LPAR (expression(',' expression)*)? RPAR '->' '{' 'func_body' '}';
+anonymous_func: LPAR (expression(',' expression)*)? RPAR '->' LCURBRACE 'func_body' RCURBRACE;
 
 anonymous_call: anonymous_func LPAR (expression(',' expression)*)? RPAR |
-    anonymous_func LPAR (identifier '=' expression(',' identifier '=' expression)*)? RPAR;
+    anonymous_func LPAR (identifier '=' expression(',' identifier '=' expression)*) RPAR;
 
-func_call: identifier LPAR ((expression|anonymous_func)(',' (anonymous_func|expression))*)? RPAR |
-    identifier LPAR (identifier '=' (anonymous_func|expression)(',' identifier '=' (anonymous_func|expression))*)? RPAR;
+func_call: identifier LPAR (('expression')(',' ('expression'))*)? RPAR |
+    identifier LPAR (identifier '=' ('expression')(',' identifier '=' ('expression'))*) RPAR;
 
 main : MAIN_KEY ':' print_call | func_call;
 
-primitive : INT | BOOl | STRING;
+primitive : INT | BOOL | STRING;
 
 identifier : IDENTIFIER;
-
-function_call : FUNC_KEY;
 
 FUNC_KEY : 'func';
 MAIN_KEY : 'main';
