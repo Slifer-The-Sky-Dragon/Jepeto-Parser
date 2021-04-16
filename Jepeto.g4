@@ -1,22 +1,45 @@
 grammar Jepeto;
 
-jepeto : statement EOF;
-//jepeto : func* main func* EOF;
+//jepeto : complete_statement EOF;
+jepeto : func* main func* EOF;
 
-func : FUNC_KEY identifier LPAR (expression(',' expression)*)? RPAR ':' 'func_body' |
-           FUNC_KEY identifier LPAR (expression(',' expression)*)? RPAR ':' LCURBRACE ('func_body')+ RCURBRACE |
-           FUNC_KEY identifier LPAR (identifier '=' expression(',' identifier '=' expression)*) RPAR ':' 'func_body' |
-           FUNC_KEY identifier LPAR (identifier '=' expression(',' identifier '=' expression)*) RPAR ':' LCURBRACE ('func_body')+ RCURBRACE;
+func : FUNC_KEY identifier LPAR (expression(',' expression)*)? RPAR ':' single_statement |
+           FUNC_KEY identifier LPAR (expression(',' expression)*)? RPAR ':' LCURBRACE statement? return RCURBRACE |
+           FUNC_KEY identifier LPAR (identifier '=' expression(',' identifier '=' expression)*) RPAR ':' single_statement |
+           FUNC_KEY identifier LPAR (identifier '=' expression(',' identifier '=' expression)*) RPAR ':' LCURBRACE statement? return RCURBRACE;
+
+//func_body: complete_if_else completed_body | statement_without_if func_body | return completed_body | not_complete_if_else func_body;
+
+//completed_body: ;
+
+
+//complete_statement : complete_matched_statement temp;
+//| complete_unmatched_statement;
+
+//complete_matched_statement : complete_matched_rule1;
+//| complete_matched_rule2 | complete_matched_rule3 | complete_matched_rule4;
+//complete_matched_rule1 : 'if' expression ':' '{' (statement return | complete_statement) '}' 'else' ':' '{' (statement return | complete_statement) '}';
+//complete_matched_rule2 : 'if' expression ':' '{' (statement return | complete_statement) '}' 'else' ':'  return;
+//complete_matched_rule3 : 'if' expression ':' return 'else' ':' '{' (statement return | complete_statement) '}';
+//complete_matched_rule4 : 'if' expression ':' return 'else' ':' return;
+//
+//complete_unmatched_statement : complete_unmatched_rule3 | complete_unmatched_rule4;
+//complete_unmatched_rule3 : 'if' expression ':' '{' statement return'}' 'else' ':' return;
+//complete_unmatched_rule4 : 'if' expression ':' return 'else' ':' return;
+
+
 
 statement : matched_statement temp | unmatched_statement temp;
 temp : statement temp |;
+
+single_statement: matched_statement | unmatched_statement;
 
 matched_statement : matched_rule1 | matched_rule2 | matched_rule3 | matched_rule4 | matched_rule5;
 matched_rule1 : 'if' expression ':' '{' statement '}' 'else' ':' '{' statement '}';
 matched_rule2 : 'if' expression ':' '{' statement '}' 'else' ':'  matched_statement;
 matched_rule3 : 'if' expression ':' matched_statement 'else' ':' '{' statement '}';
 matched_rule4 : 'if' expression ':' matched_statement 'else' ':' matched_statement;
-matched_rule5 : (print_call | anonymous_call | func_call) ';';
+matched_rule5 : (print_call | anonymous_call | func_call) ';' | return;
 
 unmatched_statement : unmatched_rule1 | unmatched_rule2 | unmatched_rule3 | unmatched_rule4;
 unmatched_rule1 : 'if' expression ':' '{' statement '}';
@@ -61,7 +84,7 @@ expression8 : expression8 '.size' | expression9;
 
 expression9 : (anonymous_call | anonymous_func | func_call | list | primitive | identifier) (LBRACE expression RBRACE)* | LPAR expression RPAR;
 
-return: 'return' 'void' | 'return' expression;
+return: ('return' 'void' | 'return' expression) ';';
 
 list: LBRACE (expression(',' expression)*)? RBRACE;
 
@@ -75,7 +98,7 @@ anonymous_call: anonymous_func LPAR (expression(',' expression)*)? RPAR |
 func_call: identifier LPAR (expression(',' expression)*)? RPAR |
     identifier LPAR (identifier '=' expression(',' identifier '=' expression)*) RPAR;
 
-main : MAIN_KEY ':' (print_call | func_call) ';';
+main : {system.out.println("Main")} MAIN_KEY ':' (print_call | func_call) ';';
 
 primitive : INT | BOOL | STRING;
 
