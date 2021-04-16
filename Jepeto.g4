@@ -4,9 +4,9 @@ grammar Jepeto;
 jepeto : func* main func* EOF;
 
 func : FUNC_KEY identifier LPAR (expression(',' expression)*)? RPAR ':' single_statement |
-           FUNC_KEY identifier LPAR (expression(',' expression)*)? RPAR ':' LCURBRACE statement? return RCURBRACE |
+           FUNC_KEY identifier LPAR (expression(',' expression)*)? RPAR ':' LCURBRACE statement? return_call RCURBRACE |
            FUNC_KEY identifier LPAR (identifier '=' expression(',' identifier '=' expression)*) RPAR ':' single_statement |
-           FUNC_KEY identifier LPAR (identifier '=' expression(',' identifier '=' expression)*) RPAR ':' LCURBRACE statement? return RCURBRACE;
+           FUNC_KEY identifier LPAR (identifier '=' expression(',' identifier '=' expression)*) RPAR ':' LCURBRACE statement? return_call RCURBRACE;
 
 //func_body: complete_if_else completed_body | statement_without_if func_body | return completed_body | not_complete_if_else func_body;
 
@@ -39,7 +39,7 @@ matched_rule1 : 'if' expression ':' '{' statement '}' 'else' ':' '{' statement '
 matched_rule2 : 'if' expression ':' '{' statement '}' 'else' ':'  matched_statement;
 matched_rule3 : 'if' expression ':' matched_statement 'else' ':' '{' statement '}';
 matched_rule4 : 'if' expression ':' matched_statement 'else' ':' matched_statement;
-matched_rule5 : (print_call | anonymous_call | func_call) ';' | return;
+matched_rule5 : (print_call | anonymous_call | func_call) ';' | return_call;
 
 unmatched_statement : unmatched_rule1 | unmatched_rule2 | unmatched_rule3 | unmatched_rule4;
 unmatched_rule1 : 'if' expression ':' '{' statement '}';
@@ -84,7 +84,7 @@ expression8 : expression8 '.size' | expression9;
 
 expression9 : (anonymous_call | anonymous_func | func_call | list | primitive | identifier) (LBRACE expression RBRACE)* | LPAR expression RPAR;
 
-return: ('return' 'void' | 'return' expression) ';';
+return_call: ('return' 'void' | 'return' expression) ';';
 
 list: LBRACE (expression(',' expression)*)? RBRACE;
 
@@ -98,7 +98,8 @@ anonymous_call: anonymous_func LPAR (expression(',' expression)*)? RPAR |
 func_call: identifier LPAR (expression(',' expression)*)? RPAR |
     identifier LPAR (identifier '=' expression(',' identifier '=' expression)*) RPAR;
 
-main : {system.out.println("Main")} MAIN_KEY ':' (print_call | func_call) ';';
+//
+main : MAIN_KEY ':' {System.out.println("Main");} (print_call | func_call) ';';
 
 primitive : INT | BOOL | STRING;
 
