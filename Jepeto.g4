@@ -8,19 +8,21 @@ func : FUNC_KEY identifier LPAR (expression(',' expression)*)? RPAR ':' 'func_bo
            FUNC_KEY identifier LPAR (identifier '=' expression(',' identifier '=' expression)*) RPAR ':' 'func_body' |
            FUNC_KEY identifier LPAR (identifier '=' expression(',' identifier '=' expression)*) RPAR ':' LCURBRACE ('func_body')+ RCURBRACE;
 
-//statement : matched_statement | unmatched_statement;
-//matched_statement : 'if' expression ':' '{' statement '}' 'else' ':' '{' statement '}' statement? |
-//                     (print_call ';' | anonymous_call ';' | func_call ';') statement?;
-//unmatched_statement : 'if' expression ':' '{' statement '}' |
-//                      'if' expression ':' '{' statement '}' 'else' ':' '{' statement '}';
+statement : matched_statement temp | unmatched_statement temp;
+temp : statement temp |;
 
-//statement : ((matched_statement | unmatched_statement) a statement) | matched_statement | unmatched_statement;
-//a : statement a | statement;
-statement : matched_statement | unmatched_statement;
-matched_statement : 'if' expression ':' matched_statement 'else' ':' matched_statement statement?|
-                     (print_call ';' | anonymous_call ';' | func_call ';');
-unmatched_statement : 'if' expression ':' matched_statement 'else' ':' unmatched_statement|
-                       'if' expression ':' statement;
+matched_statement : matched_rule1 | matched_rule2 | matched_rule3 | matched_rule4 | matched_rule5;
+matched_rule1 : 'if' expression ':' '{' statement '}' 'else' ':' '{' statement '}';
+matched_rule2 : 'if' expression ':' '{' statement '}' 'else' ':'  matched_statement;
+matched_rule3 : 'if' expression ':' matched_statement 'else' ':' '{' statement '}';
+matched_rule4 : 'if' expression ':' matched_statement 'else' ':' matched_statement;
+matched_rule5 : (print_call | anonymous_call | func_call) ';';
+
+unmatched_statement : unmatched_rule1 | unmatched_rule2 | unmatched_rule3 | unmatched_rule4;
+unmatched_rule1 : 'if' expression ':' '{' statement '}';
+unmatched_rule2 : 'if' expression ':' statement;
+unmatched_rule3 : 'if' expression ':' '{' statement '}' 'else' ':' unmatched_statement;
+unmatched_rule4 : 'if' expression ':' matched_statement 'else' ':' unmatched_statement;
 
 //delete left recursion
 expression : expression 'or' expression1 | expression1;
