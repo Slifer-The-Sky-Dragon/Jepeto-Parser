@@ -1,0 +1,21 @@
+func f(): {
+if (ali):
+    ds();
+else:
+    if ali2:
+        f();
+if (alas):
+    if (sina): 
+        return 1;
+    
+    else: 
+        return 8;
+    
+
+else: {
+    return 2;
+}
+return 5;
+f();
+}
+main: print(ali);

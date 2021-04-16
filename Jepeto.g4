@@ -3,36 +3,61 @@ grammar Jepeto;
 //jepeto : complete_statement EOF;
 jepeto : func* main func* EOF;
 
-func : FUNC_KEY identifier LPAR (expression(',' expression)*)? RPAR ':' single_statement |
-           FUNC_KEY identifier LPAR (expression(',' expression)*)? RPAR ':' LCURBRACE statement? return_call RCURBRACE |
-           FUNC_KEY identifier LPAR (identifier '=' expression(',' identifier '=' expression)*) RPAR ':' single_statement |
-           FUNC_KEY identifier LPAR (identifier '=' expression(',' identifier '=' expression)*) RPAR ':' LCURBRACE statement? return_call RCURBRACE;
+func : FUNC_KEY identifier LPAR (expression(',' expression)*)? RPAR ':' single_complete_statement |
+           FUNC_KEY identifier LPAR (expression(',' expression)*)? RPAR ':' LCURBRACE complete_statement RCURBRACE |
+           FUNC_KEY identifier LPAR (identifier '=' expression(',' identifier '=' expression)*) RPAR ':' single_complete_statement |
+           FUNC_KEY identifier LPAR (identifier '=' expression(',' identifier '=' expression)*) RPAR ':' LCURBRACE complete_statement RCURBRACE;
 
 //func_body: complete_if_else completed_body | statement_without_if func_body | return completed_body | not_complete_if_else func_body;
 
 //completed_body: ;
 
 
-//complete_statement : complete_matched_statement temp;
-//| complete_unmatched_statement;
 
-//complete_matched_statement : complete_matched_rule1;
-//| complete_matched_rule2 | complete_matched_rule3 | complete_matched_rule4;
-//complete_matched_rule1 : 'if' expression ':' '{' (statement return | complete_statement) '}' 'else' ':' '{' (statement return | complete_statement) '}';
-//complete_matched_rule2 : 'if' expression ':' '{' (statement return | complete_statement) '}' 'else' ':'  return;
-//complete_matched_rule3 : 'if' expression ':' return 'else' ':' '{' (statement return | complete_statement) '}';
-//complete_matched_rule4 : 'if' expression ':' return 'else' ':' return;
-//
-//complete_unmatched_statement : complete_unmatched_rule3 | complete_unmatched_rule4;
-//complete_unmatched_rule3 : 'if' expression ':' '{' statement return'}' 'else' ':' return;
-//complete_unmatched_rule4 : 'if' expression ':' return 'else' ':' return;
+not_complete_statement : not_complete_matched_statement temp2 | not_complete_unmatched_statement temp2;
+temp2 : not_complete_statement temp2 |;
+
+not_complete_matched_statement : not_complete_matched_rule1 | not_complete_matched_rule2 | not_complete_matched_rule3 | not_complete_matched_rule4 | not_complete_matched_rule5 |
+                                not_complete_matched_rule6 | not_complete_matched_rule7 | not_complete_matched_rule8 | not_complete_matched_rule9;
+not_complete_matched_rule1 : 'if' expression ':' '{' statement '}' 'else' ':' '{' not_complete_statement '}';
+not_complete_matched_rule2 : 'if' expression ':' '{' not_complete_statement '}' 'else' ':' '{' statement '}';
+not_complete_matched_rule3 : 'if' expression ':' '{' statement '}' 'else' ':'  not_complete_matched_statement;
+not_complete_matched_rule4 : 'if' expression ':' '{' not_complete_statement '}' 'else' ':'  matched_statement;
+not_complete_matched_rule5 : 'if' expression ':' matched_statement 'else' ':' '{' not_complete_statement '}';
+not_complete_matched_rule6 : 'if' expression ':' not_complete_matched_statement 'else' ':' '{' statement '}';
+not_complete_matched_rule7 : 'if' expression ':' matched_statement 'else' ':' not_complete_matched_statement;
+not_complete_matched_rule8 : 'if' expression ':' not_complete_matched_statement 'else' ':' matched_statement;
+not_complete_matched_rule9 : (print_call | anonymous_call | func_call) ';';
+
+not_complete_unmatched_statement : not_complete_unmatched_rule1 | not_complete_unmatched_rule2 | not_complete_unmatched_rule3 | not_complete_unmatched_rule4
+                                    not_complete_unmatched_rule5 | not_complete_unmatched_rule6;
+not_complete_unmatched_rule1 : 'if' expression ':' '{' statement '}';
+not_complete_unmatched_rule2 : 'if' expression ':' statement;
+not_complete_unmatched_rule3 : 'if' expression ':' '{' statement '}' 'else' ':' not_complete_unmatched_statement;
+not_complete_unmatched_rule4 : 'if' expression ':' '{' not_complete_statement '}' 'else' ':' unmatched_statement;
+not_complete_unmatched_rule5 : 'if' expression ':' matched_statement 'else' ':' not_complete_unmatched_statement;
+not_complete_unmatched_rule6 : 'if' expression ':' not_complete_matched_statement 'else' ':' unmatched_statement;
+
+
+
+complete_statement : not_complete_statement? complete_matched_statement statement?;
+//| statement? complete_unmatched_statement statement?;
+single_complete_statement : complete_matched_statement;
+
+complete_matched_statement : complete_matched_rule1 | complete_matched_rule2 | complete_matched_rule3 | complete_matched_rule4 | return_call;
+complete_matched_rule1 : 'if' expression ':' '{' (complete_statement) '}' 'else' ':' '{' (complete_statement) '}';
+complete_matched_rule2 : 'if' expression ':' '{' (complete_statement) '}' 'else' ':'  complete_matched_statement;
+complete_matched_rule3 : 'if' expression ':' complete_matched_statement 'else' ':' '{' (complete_statement) '}';
+complete_matched_rule4 : 'if' expression ':' complete_matched_statement 'else' ':' complete_matched_statement;
+
+//complete_unmatched_statement : complete_unmatched_rule1 | complete_unmatched_rule2;
+//complete_unmatched_rule1 : 'if' expression ':' '{' (return_call | complete_statement) '}' 'else' ':' complete_unmatched_statement;
+//complete_unmatched_rule2 : 'if' expression ':' complete_matched_statement 'else' ':' complete_unmatched_statement;
 
 
 
 statement : matched_statement temp | unmatched_statement temp;
 temp : statement temp |;
-
-single_statement: matched_statement | unmatched_statement;
 
 matched_statement : matched_rule1 | matched_rule2 | matched_rule3 | matched_rule4 | matched_rule5;
 matched_rule1 : 'if' expression ':' '{' statement '}' 'else' ':' '{' statement '}';
