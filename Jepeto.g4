@@ -4,8 +4,6 @@ jepeto : func* main func* EOF;
 
 func : FUNC_KEY funcname  LPAR (func_args(',' func_args)*)? RPAR ':' single_complete_statement |
            FUNC_KEY funcname LPAR (func_args(',' func_args)*)? RPAR ':' LCURBRACE complete_statement RCURBRACE;
-//           FUNC_KEY funcname LPAR (IDENTIFIER '=' expression(',' IDENTIFIER '=' expression)*) RPAR ':' single_complete_statement |
-//           FUNC_KEY funcname LPAR (IDENTIFIER '=' expression(',' IDENTIFIER '=' expression)*) RPAR ':' LCURBRACE complete_statement RCURBRACE;
 
 
 funcname : IDENTIFIER {System.out.println("FunctionDec : " + $IDENTIFIER.getText());};
@@ -70,44 +68,57 @@ unmatched_rule4 : if_rule expression ':' matched_statement else_rule ':' unmatch
 
 
 //delete left recursion
-expression : expression 'or' expression1 {System.out.println("Operator : or");} | expression1;
-//expression : expression1 a | expression1;
-//a: 'or' expression1 a | 'or' expression1;
+//expression : expression 'or' expression1 {System.out.println("Operator : or");} | expression1;
+expression : expression1 a | expression1;
+a: 'or' expression1 {System.out.println("Operator : or");} a | 'or' expression1 {System.out.println("Operator : or");};
 
-expression1 : expression1 'and' expression2 {System.out.println("Operator : and");} | expression2;
-//expression1 : expression2 b | expression2;
-//b: 'and' expression2 b | 'and' expression2;
+//expression1 : expression1 'and' expression2 {System.out.println("Operator : and");} | expression2;
+expression1 : expression2 b | expression2;
+b: 'and' expression2 {System.out.println("Operator : and");} b | 'and' expression2 {System.out.println("Operator : and");};
 
-expression2 : expression2 'is' expression3 {System.out.println("Operator : is");}|
-              expression2 'not' expression3 {System.out.println("Operator : not");} | expression3;
-//expression2 : expression3 c | expression3;
-//c: 'is' expression3 c | 'not' expression3 c | 'is' expression3 | 'not' expression3;
+//expression2 : expression2 'is' expression3 {System.out.println("Operator : is");}|
+//              expression2 'not' expression3 {System.out.println("Operator : not");} | expression3;
+expression2 : expression3 c | expression3;
+c: 'is' expression3 {System.out.println("Operator : is");} c |
+   'not' expression3 {System.out.println("Operator : not");} c |
+   'is' expression3 {System.out.println("Operator : is");} |
+   'not' expression3 {System.out.println("Operator : not");};
 
-expression3 : expression3 '<' expression4 {System.out.println("Operator : <");} |
-              expression3 '>' expression4 {System.out.println("Operator : >");} | expression4;
-//expression3 : expression4 d | expression4;
-//d: '<' expression4 d | '>' expression4 d | '<' expression4 | '>' expression4;
+//expression3 : expression3 '<' expression4 {System.out.println("Operator : <");} |
+//              expression3 '>' expression4 {System.out.println("Operator : >");} | expression4;
 
-expression4 : expression4 '+' expression5 {System.out.println("Operator : +");} |
-              expression4 '-' expression5 {System.out.println("Operator : -");}| expression5;
-//expression4 : expression5 e | expression5;
-//e: '+' expression5 e | '-' expression5 e | '+' expression5 | '-' expression5;
+expression3 : expression4 d | expression4;
+d: '<' expression4 {System.out.println("Operator : <");} d |
+   '>' expression4 {System.out.println("Operator : >");} d |
+   '<' expression4 {System.out.println("Operator : <");}|
+   '>' expression4 {System.out.println("Operator : >");};
 
-expression5 : expression5 '*' expression6 {System.out.println("Operator : *");} |
-              expression5 '/' expression6 {System.out.println("Operator : /");} | expression6;
-//expression5 : expression6 f | expression6;
-//f: '*' expression6 f | '/' expression6 f | '*' expression6 | '/' expression6;
+//expression4 : expression4 '+' expression5 {System.out.println("Operator : +");} |
+//              expression4 '-' expression5 {System.out.println("Operator : -");}| expression5;
+expression4 : expression5 e | expression5;
+e: '+' expression5 {System.out.println("Operator : +");} e |
+   '-' expression5 {System.out.println("Operator : -");} e |
+   '+' expression5 {System.out.println("Operator : +");}|
+   '-' expression5 {System.out.println("Operator : -");};
+
+//expression5 : expression5 '*' expression6 {System.out.println("Operator : *");} |
+//              expression5 '/' expression6 {System.out.println("Operator : /");} | expression6;
+expression5 : expression6 f | expression6;
+f: '*' expression6 {System.out.println("Operator : *");} f |
+   '/' expression6 {System.out.println("Operator : /");} f |
+   '*' expression6 {System.out.println("Operator : *");} |
+   '/' expression6 {System.out.println("Operator : /");};
 
 expression6 : '-' expression6 {System.out.println("Operator : -");} |
               '~' expression6 {System.out.println("Operator : ~");} | expression7;
 
-expression7 : expression7 '::' expression8 {System.out.println("Operator : ::");} | expression8;
-//expression7 : expression8 g | expression8;
-//g: '::' expression8 g | '::' expression8;
+//expression7 : expression7 '::' expression8 {System.out.println("Operator : ::");} | expression8;
+expression7 : expression8 g | expression8;
+g: '::' expression8 {System.out.println("Operator : ::");} g | '::' expression8 {System.out.println("Operator : ::");};
 
-expression8 : expression8 '.size' {System.out.println("Size");} | expression9;
-//expression8 : expression9 h | expression9;
-//h: '.size' h | '.size';
+//expression8 : expression8 '.size' {System.out.println("Size");} | expression9;
+expression8 : expression9 h | expression9;
+h: '.size' {System.out.println("Size");} h | '.size' {System.out.println("Size");};
 
 expression9 : (anonymous_call | anonymous_func | func_call | list | primitive | IDENTIFIER) (LBRACE expression RBRACE)* | LPAR expression RPAR;
 
@@ -129,7 +140,6 @@ main : MAIN_KEY ':' {System.out.println("Main");} (print_call | {System.out.prin
 
 primitive : INT | BOOL | STRING;
 
-
 FUNC_KEY : 'func';
 MAIN_KEY : 'main';
 IDENTIFIER : [_A-Za-z][_A-Za-z0-9]*;
@@ -144,4 +154,3 @@ WS : [ \t\r\n]+ -> skip;
 INT : '0' | [1-9][0-9]*;
 STRING : '"' ~('"') + '"';
 COMMA : ',';
-//KEYWORD : 'bool' | 'int' | 'string';
