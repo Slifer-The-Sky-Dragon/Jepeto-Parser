@@ -1,0 +1,7 @@
+func Multiply(a, b):{
+    if a is 0:
+        return 0;
+    return a + Multiply(a - 1 , b);
+}
+
+main: print(Multiply(4,5));

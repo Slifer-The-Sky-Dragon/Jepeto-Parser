@@ -121,7 +121,7 @@ return_call: {System.out.println("Return");} ('return' 'void' | 'return' express
 
 list: LBRACE (expression(',' expression)*)? RBRACE;
 
-print_call: {System.out.println("Built-in : print");} 'print' LPAR expression? RPAR;
+print_call: {System.out.println("Built-in : print");} 'print' LPAR expression RPAR;
 
 anonymous_func: {System.out.println("Anonymous Function");} LPAR (func_args(',' func_args)*)? RPAR '->' LCURBRACE complete_statement RCURBRACE;
 
