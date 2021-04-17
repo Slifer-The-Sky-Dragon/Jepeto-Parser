@@ -11,8 +11,8 @@ func_args : IDENTIFIER {System.out.println("ArgumentDec : " + $IDENTIFIER.getTex
 if_rule : 'if' {System.out.println("Conditional : if");};
 else_rule : 'else' {System.out.println("Conditional : else");};
 
-not_complete_statement : not_complete_matched_statement temp2 | not_complete_unmatched_statement temp2;
-temp2 : not_complete_statement temp2 |;
+not_complete_statement : single_not_complete_statement not_complete_statement | single_not_complete_statement;
+single_not_complete_statement : not_complete_matched_statement | not_complete_unmatched_statement;
 
 not_complete_matched_statement : not_complete_matched_rule1 | not_complete_matched_rule2 | not_complete_matched_rule3 | not_complete_matched_rule4 | not_complete_matched_rule5 |
                                 not_complete_matched_rule6 | not_complete_matched_rule7 | not_complete_matched_rule8 | not_complete_matched_rule9;
@@ -48,8 +48,7 @@ complete_matched_rule4 : if_rule expression ':' complete_matched_statement else_
 
 
 
-statement : matched_statement temp | unmatched_statement temp;
-temp : statement temp |;
+statement: single_statement statement | single_statement;
 single_statement : matched_statement | unmatched_statement;
 
 matched_statement : matched_rule1 | matched_rule2 | matched_rule3 | matched_rule4 | matched_rule5;
