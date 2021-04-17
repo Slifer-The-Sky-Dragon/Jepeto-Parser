@@ -132,8 +132,7 @@ anonymous_func: {System.out.println("Anonymous Function");} LPAR (func_args(',' 
 anonymous_call: anonymous_func LPAR (expression(',' expression)*)? RPAR |
     anonymous_func LPAR (IDENTIFIER '=' expression(',' IDENTIFIER '=' expression)*) RPAR;
 
-func_call: IDENTIFIER (LPAR (expression(',' expression)*)? RPAR)+ |
-    IDENTIFIER LPAR ((IDENTIFIER '=' expression(',' IDENTIFIER '=' expression)*))+ RPAR;
+func_call: IDENTIFIER (LPAR (expression(',' expression)*)? RPAR | LPAR (IDENTIFIER '=' expression(',' IDENTIFIER '=' expression)*) RPAR)+;
 
 main : MAIN_KEY ':' {System.out.println("Main");} (print_call | {System.out.println("FunctionCall");} func_call) ';';
 
